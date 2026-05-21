@@ -7,7 +7,7 @@ import { ReportForm } from "@/components/report/ReportForm";
 export default function ReportPage() {
   return (
     <main className="min-h-screen bg-[#f8faf7] px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <header className="flex items-center justify-between gap-4">
           <Link
             href="/"
@@ -20,8 +20,8 @@ export default function ReportPage() {
           </span>
         </header>
 
-        <section className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-          <div className="pt-4">
+        <section className="grid gap-10 lg:grid-cols-[0.85fr_1.25fr] lg:items-start">
+          <div className="pt-4 lg:sticky lg:top-8">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
               Report a spot
             </p>

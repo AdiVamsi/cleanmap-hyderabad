@@ -17,7 +17,7 @@ import {
 } from "@/lib/constants";
 
 type SubmitState = "idle" | "submitting" | "success";
-type SeverityValue = "chhota" | "dikkat" | "zabardast" | "khatarnak";
+type SeverityValue = "minor" | "noticeable" | "severe" | "critical";
 
 type AnalysisResult = {
   waste_type: string | null;
@@ -244,7 +244,7 @@ export function ReportForm() {
     <form
       ref={formRef}
       onSubmit={handleSubmit}
-      className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-7"
     >
       <div className="grid gap-5">
         <div className="grid gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
@@ -349,12 +349,15 @@ export function ReportForm() {
 
         <fieldset className="grid gap-3">
           <legend className="text-sm font-bold text-slate-700">Severity</legend>
+          <p className="text-xs font-semibold text-slate-500">
+            Pick the closest level. You can still submit if you are unsure.
+          </p>
           <input type="hidden" name="severity" value={severity} />
-          <div className="grid gap-3 sm:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2">
             {SEVERITY_OPTIONS.map((severityValue) => (
               <label
                 key={severityValue}
-                className="flex cursor-pointer items-center gap-3 rounded-md border border-slate-300 px-3 py-3 text-sm font-semibold text-slate-700 transition has-[:checked]:border-civic has-[:checked]:bg-teal-50"
+                className="grid min-h-[92px] cursor-pointer grid-cols-[auto_1fr] items-start gap-3 rounded-md border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700 transition hover:border-civic/60 hover:bg-slate-50 has-[:checked]:border-civic has-[:checked]:bg-teal-50 has-[:checked]:shadow-sm"
               >
                 <input
                   name="severity"
@@ -362,14 +365,14 @@ export function ReportForm() {
                   value={severityValue}
                   checked={severity === severityValue}
                   onChange={() => setSeverity(severityValue)}
-                  className="h-4 w-4 accent-civic"
+                  className="mt-1 h-4 w-4 shrink-0 accent-civic"
                   required
                 />
-                <div className="grid gap-0.5">
-                  <span className="font-bold">
+                <div className="grid min-w-0 gap-1">
+                  <span className="break-words font-bold leading-tight">
                     {SEVERITY_LABELS[severityValue]}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="break-words text-xs leading-snug text-slate-500">
                     {SEVERITY_DESCRIPTIONS[severityValue]}
                   </span>
                 </div>

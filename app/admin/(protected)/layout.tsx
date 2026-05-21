@@ -31,6 +31,13 @@ export default function AdminProtectedLayout({
             <Link href="/admin" className="font-bold text-ink">
               Admin
             </Link>
+            <span className="text-slate-300">/</span>
+            <Link
+              href="/admin/stories"
+              className="font-semibold text-slate-500 transition hover:text-ink"
+            >
+              Stories
+            </Link>
           </div>
           <LogoutButton />
         </div>

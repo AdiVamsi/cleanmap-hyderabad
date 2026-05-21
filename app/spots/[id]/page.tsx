@@ -31,6 +31,10 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function publicUrl(path: string) {
+  return `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}${path}`;
+}
+
 function PhotoFigure({
   photo,
   label,
@@ -230,6 +234,29 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
             >
               Report a spot
             </Link>
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-ink">Share this spot</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Spread the word in your community.
+              </p>
+            </div>
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(
+                `${spot.title} — CleanMap Hyderabad\n${publicUrl(
+                  `/spots/${spot.id}`
+                )}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-fit items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white transition hover:opacity-90"
+            >
+              Share on WhatsApp
+            </a>
           </div>
         </section>
       </div>

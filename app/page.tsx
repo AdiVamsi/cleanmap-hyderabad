@@ -4,8 +4,10 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { ImpactSection } from "@/components/home/ImpactSection";
 import { MapPreview } from "@/components/home/MapPreview";
 import { StatsBar } from "@/components/home/StatsBar";
+import { StoriesTeaser } from "@/components/home/StoriesTeaser";
 import type {
   ImpactPair,
+  PublicStoryWithDetails,
   PublicSpot,
   PublicSpotWithPhoto,
   SpotCounts
@@ -60,7 +62,13 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
 }
 
 export default async function HomePage() {
-  const [statsResponse, approvedResponse, mapResponse, impactResponse] =
+  const [
+    statsResponse,
+    approvedResponse,
+    mapResponse,
+    impactResponse,
+    storiesResponse
+  ] =
     await Promise.all([
       fetchJson<{ counts: SpotCounts }>("/api/spots?counts=true", {
         counts: EMPTY_COUNTS
@@ -76,6 +84,10 @@ export default async function HomePage() {
       fetchJson<{ impactPairs: ImpactPair[] }>(
         "/api/spots?status=cleaned&limit=4&impact=true",
         { impactPairs: [] }
+      ),
+      fetchJson<{ stories: PublicStoryWithDetails[] }>(
+        "/api/stories?limit=2",
+        { stories: [] }
       )
     ]);
 
@@ -86,6 +98,7 @@ export default async function HomePage() {
       <ApprovedSpotsGrid spots={approvedResponse.spots} />
       <MapPreview spots={mapResponse.spots} />
       <ImpactSection pairs={impactResponse.impactPairs} />
+      <StoriesTeaser stories={storiesResponse.stories} />
       <CTAStrip />
     </main>
   );

@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 type AnalysisResult = {
   waste_type: string | null;
-  severity: "chhota" | "dikkat" | "zabardast" | "khatarnak" | null;
+  severity: "minor" | "noticeable" | "severe" | "critical" | null;
   suggested_title: string | null;
   suggested_description: string | null;
 };
@@ -22,20 +22,19 @@ const PROMPT = `Analyze this photo of a dirty spot in Hyderabad, India reported 
 Respond with ONLY valid JSON — no markdown, no explanation, no code fences:
 {
   "waste_type": "plastic|construction_debris|organic|mixed|other",
-  "severity": "chhota|dikkat|zabardast|khatarnak",
+  "severity": "minor|noticeable|severe|critical",
   "suggested_title": "Short specific title, max 60 characters",
   "suggested_description": "1-2 sentences describing what you see, max 180 characters"
 }
 
 Severity rules (Hyderabad context):
-- khatarnak: Health hazard, near water body, blocking drain or footpath,
-  large pile affecting many people
-- zabardast: Large pile, serious but not immediately dangerous, needs
-  urgent cleanup
-- dikkat: Moderate waste, inconvenient, noticeable problem for locals
-- chhota: Minor litter, small area, minimal public impact
+- critical: Urgent/dangerous health hazard, near water body, blocking drain
+  or footpath, large pile affecting many people
+- severe: Serious issue, large pile, needs urgent cleanup
+- noticeable: Needs attention, moderate waste, noticeable problem for locals
+- minor: Small issue, minor litter, small area, minimal public impact
 
-If the image is unclear or not a waste spot, still return your best guess with severity: "chhota".`;
+If the image is unclear or not a waste spot, still return your best guess with severity: "minor".`;
 
 function normalizeAnalysis(value: unknown): AnalysisResult {
   if (!value || typeof value !== "object") {
@@ -44,7 +43,7 @@ function normalizeAnalysis(value: unknown): AnalysisResult {
 
   const result = value as Record<string, unknown>;
   const severity = result.severity;
-  const validSeverities = ["chhota", "dikkat", "zabardast", "khatarnak"];
+  const validSeverities = ["minor", "noticeable", "severe", "critical"];
 
   return {
     waste_type:

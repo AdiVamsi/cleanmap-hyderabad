@@ -32,7 +32,7 @@ const ZERO_COUNTS: SpotCounts = {
 };
 
 function isSeverity(value: unknown): value is Severity {
-  return ["chhota", "dikkat", "zabardast", "khatarnak"].includes(
+  return ["minor", "noticeable", "severe", "critical"].includes(
     value as string
   );
 }

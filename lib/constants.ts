@@ -48,29 +48,29 @@ export const STATUS_LABELS = {
 } as const;
 
 export const SEVERITY_OPTIONS = [
-  "chhota",
-  "dikkat",
-  "zabardast",
-  "khatarnak"
+  "minor",
+  "noticeable",
+  "severe",
+  "critical"
 ] as const;
 
 export const SEVERITY_LABELS = {
-  chhota: "Chhota",
-  dikkat: "Dikkat",
-  zabardast: "Zabardast",
-  khatarnak: "Khatarnak"
+  minor: "Minor",
+  noticeable: "Noticeable",
+  severe: "Severe",
+  critical: "Critical"
 } as const;
 
 export const SEVERITY_COLORS = {
-  chhota: "#CA8A04",
-  dikkat: "#D97706",
-  zabardast: "#B91C1C",
-  khatarnak: "#7F1D1D"
+  minor: "#CA8A04",
+  noticeable: "#D97706",
+  severe: "#B91C1C",
+  critical: "#7F1D1D"
 } as const;
 
 export const SEVERITY_DESCRIPTIONS = {
-  chhota: "Minor litter, small area",
-  dikkat: "Moderate waste, noticeable",
-  zabardast: "Large pile, serious issue",
-  khatarnak: "Health hazard, critical"
+  minor: "Small issue",
+  noticeable: "Needs attention",
+  severe: "Serious issue",
+  critical: "Urgent/dangerous"
 } as const;

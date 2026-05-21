@@ -3,11 +3,16 @@ import type {
   AdminSpot,
   AdminSpotWithDetails,
   Photo,
+  Story,
   StatusHistory
 } from "@/lib/types";
 
 export const ADMIN_SPOT_SELECT =
   "id,title,description,address,ward,latitude,longitude,severity,status,reported_by_name,reported_by_phone,admin_note,cleanup_date,created_at,updated_at";
+
+function isMissingStoriesTable(error: { code?: string } | null) {
+  return error?.code === "PGRST205";
+}
 
 export async function getAdminSpots(): Promise<AdminSpot[]> {
   if (!hasServiceRoleEnv()) {
@@ -35,7 +40,7 @@ export async function getAdminSpotWithDetails(
   }
 
   const supabase = createServiceRoleClient();
-  const [spotResult, photosResult, historyResult] = await Promise.all([
+  const [spotResult, photosResult, historyResult, storyResult] = await Promise.all([
     supabase.from("spots").select(ADMIN_SPOT_SELECT).eq("id", id).single(),
     supabase
       .from("photos")
@@ -46,7 +51,12 @@ export async function getAdminSpotWithDetails(
       .from("status_history")
       .select("*")
       .eq("spot_id", id)
-      .order("changed_at", { ascending: true })
+      .order("changed_at", { ascending: true }),
+    supabase
+      .from("stories")
+      .select("id,spot_id,headline,caption,published,created_at,updated_at")
+      .eq("spot_id", id)
+      .maybeSingle()
   ]);
 
   if (spotResult.error) {
@@ -69,9 +79,18 @@ export async function getAdminSpotWithDetails(
     throw historyResult.error;
   }
 
+  if (
+    storyResult.error &&
+    storyResult.error.code !== "PGRST116" &&
+    !isMissingStoriesTable(storyResult.error)
+  ) {
+    throw storyResult.error;
+  }
+
   return {
     ...(spotResult.data as AdminSpot),
     photos: (photosResult.data ?? []) as Photo[],
-    history: (historyResult.data ?? []) as StatusHistory[]
+    history: (historyResult.data ?? []) as StatusHistory[],
+    story: (storyResult.data ?? null) as Story | null
   };
 }

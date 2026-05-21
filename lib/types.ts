@@ -79,10 +79,37 @@ export interface AdminSpot {
 export interface AdminSpotWithDetails extends AdminSpot {
   photos: Photo[];
   history: StatusHistory[];
+  story: Story | null;
 }
 
 export interface StatusTransitionPayload {
   status: SpotStatus;
   cleanup_date?: string | null;
   note?: string;
+}
+
+export interface Story {
+  id: string;
+  spot_id: string;
+  headline: string;
+  caption: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PublicStoryWithDetails {
+  id: string;
+  spot_id: string;
+  headline: string;
+  caption: string;
+  created_at: string;
+  spot: {
+    title: string;
+    ward: string;
+    address: string;
+    cleanup_date: string | null;
+  };
+  before_photo_url: string | null;
+  after_photo_url: string | null;
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import imageCompression from "browser-image-compression";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
   SEVERITY_COLORS,
@@ -14,6 +15,7 @@ import type {
   AdminSpotWithDetails,
   Photo,
   SpotStatus,
+  Story,
   StatusTransitionPayload
 } from "@/lib/types";
 
@@ -168,6 +170,14 @@ export function StatusPanel({ spot }: StatusPanelProps) {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [storyLoading, setStoryLoading] = useState(false);
+  const [storyDraft, setStoryDraft] = useState(
+    Boolean(spot.story && !spot.story.published)
+  );
+  const [storyHeadline, setStoryHeadline] = useState(spot.story?.headline ?? "");
+  const [storyCaption, setStoryCaption] = useState(spot.story?.caption ?? "");
+  const [storyError, setStoryError] = useState("");
+  const [storySaving, setStorySaving] = useState(false);
 
   const photos = useMemo(() => {
     return {
@@ -177,6 +187,13 @@ export function StatusPanel({ spot }: StatusPanelProps) {
   }, [spot.photos]);
 
   const today = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    setStoryDraft(Boolean(spot.story && !spot.story.published));
+    setStoryHeadline(spot.story?.headline ?? "");
+    setStoryCaption(spot.story?.caption ?? "");
+    setStoryError("");
+  }, [spot.story]);
 
   function toggleAction(action: ActionDefinition) {
     setError("");
@@ -298,6 +315,89 @@ export function StatusPanel({ spot }: StatusPanelProps) {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGenerateStory() {
+    setStoryLoading(true);
+    setStoryError("");
+
+    try {
+      const response = await fetch("/api/ai/generate-caption", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ spot_id: spot.id })
+      });
+      const body = (await response.json()) as {
+        headline?: string;
+        caption?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !body.headline || !body.caption) {
+        throw new Error(body.error ?? "Generation failed");
+      }
+
+      setStoryHeadline(body.headline);
+      setStoryCaption(body.caption);
+      setStoryDraft(true);
+    } catch (generationError) {
+      setStoryError(
+        generationError instanceof Error
+          ? generationError.message
+          : "Generation failed. Try again."
+      );
+    } finally {
+      setStoryLoading(false);
+    }
+  }
+
+  async function saveStory(published: boolean) {
+    if (!storyHeadline.trim() || !storyCaption.trim()) {
+      setStoryError("Headline and caption are required.");
+      return;
+    }
+
+    setStorySaving(true);
+    setStoryError("");
+
+    try {
+      const response = await fetch(
+        spot.story ? `/api/admin/stories/${spot.story.id}` : "/api/admin/stories",
+        {
+          method: spot.story ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            spot_id: spot.id,
+            headline: storyHeadline,
+            caption: storyCaption,
+            published
+          })
+        }
+      );
+      const body = (await response.json()) as {
+        story?: Story;
+        error?: string;
+      };
+
+      if (!response.ok || !body.story) {
+        throw new Error(body.error ?? "Unable to save story");
+      }
+
+      setStoryDraft(!published);
+      router.refresh();
+    } catch (storySaveError) {
+      setStoryError(
+        storySaveError instanceof Error
+          ? storySaveError.message
+          : "Unable to save story"
+      );
+    } finally {
+      setStorySaving(false);
     }
   }
 
@@ -550,6 +650,104 @@ export function StatusPanel({ spot }: StatusPanelProps) {
             >
               {uploading ? "Uploading..." : "Upload after photo"}
             </button>
+          </div>
+        ) : null}
+
+        {spot.status === "cleaned" && photos.before && photos.after ? (
+          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-bold text-ink">Cleanup Story</h2>
+
+            {!spot.story && !storyDraft ? (
+              <>
+                <p className="mt-2 text-sm text-slate-500">
+                  Generate an AI-written story for this cleanup to publish
+                  publicly.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleGenerateStory}
+                  disabled={storyLoading}
+                  className="mt-4 w-full rounded-md bg-civic px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                >
+                  {storyLoading ? "Generating..." : "Generate Story"}
+                </button>
+              </>
+            ) : null}
+
+            {storyDraft || spot.story?.published === false ? (
+              <div className="mt-4 grid gap-4">
+                <label className="grid gap-2">
+                  <span className="text-sm font-bold text-slate-700">
+                    Headline
+                  </span>
+                  <input
+                    value={storyHeadline}
+                    onChange={(event) => setStoryHeadline(event.target.value)}
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm font-bold text-slate-700">
+                    Caption
+                  </span>
+                  <textarea
+                    value={storyCaption}
+                    onChange={(event) => setStoryCaption(event.target.value)}
+                    rows={5}
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+                  />
+                </label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => saveStory(false)}
+                    disabled={storySaving}
+                    className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-ink transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {storySaving ? "Saving..." : "Save draft"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => saveStory(true)}
+                    disabled={storySaving}
+                    className="rounded-md bg-civic px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  >
+                    {storySaving ? "Publishing..." : "Publish"}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {spot.story?.published && !storyDraft ? (
+              <div className="mt-4 grid gap-4">
+                <span className="w-fit rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                  Published
+                </span>
+                <p className="text-base font-bold leading-6 text-ink">
+                  {spot.story.headline}
+                </p>
+                <Link
+                  href={`/stories/${spot.story.id}`}
+                  className="text-sm font-bold text-civic hover:underline"
+                >
+                  View story →
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => saveStory(false)}
+                  disabled={storySaving}
+                  className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-ink transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {storySaving ? "Saving..." : "Unpublish"}
+                </button>
+              </div>
+            ) : null}
+
+            {storyError ? (
+              <p className="mt-3 text-sm font-semibold text-red-600">
+                {storyError}
+              </p>
+            ) : null}
           </div>
         ) : null}
       </aside>
