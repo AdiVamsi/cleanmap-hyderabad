@@ -4,6 +4,7 @@
 - [ ] Supabase project created and schema.sql applied
 - [ ] `spot-photos` storage bucket set to public
 - [ ] RLS policies verified (anon: SELECT public_spots only; service role: full access)
+- [ ] Run supabase/indexes.sql in Supabase SQL Editor (or apply via schema.sql)
 - [ ] `.env.local` has all 5 env vars — do NOT commit this file
 - [ ] Seed script run: `npm run seed`
 - [ ] `NEXT_PUBLIC_SITE_URL` set to the final Vercel URL
@@ -15,6 +16,9 @@ SUPABASE_SERVICE_ROLE_KEY
 NEXT_PUBLIC_MAPBOX_TOKEN
 ADMIN_PASSWORD
 NEXT_PUBLIC_SITE_URL   (set to https://your-project.vercel.app)
+GEMINI_API_KEY
+RESEND_API_KEY          (optional — if missing, no email is sent)
+ADMIN_EMAIL             (optional — if missing, no email is sent)
 
 
 

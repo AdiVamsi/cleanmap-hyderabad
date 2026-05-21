@@ -93,13 +93,13 @@ export default async function AdminStoriesPage() {
         </div>
         <Link
           href="/admin"
-          className="text-sm font-bold text-civic hover:underline"
+          className="text-sm font-bold text-forest hover:underline"
         >
           Back to queue →
         </Link>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="mt-8 overflow-hidden rounded-lg border border-warm-border bg-white shadow-sm">
         {stories.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
@@ -128,7 +128,7 @@ export default async function AdminStoriesPage() {
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-bold ${
                           story.published
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-green-100 text-forest"
                             : "bg-slate-100 text-slate-600"
                         }`}
                       >

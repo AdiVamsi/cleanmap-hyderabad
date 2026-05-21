@@ -39,7 +39,7 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
             {!isLast ? (
               <span className="absolute left-5 top-10 h-[calc(100%-1rem)] w-px bg-slate-200" />
             ) : null}
-            <span className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-base shadow-sm">
+            <span className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-warm-border bg-white text-base shadow-sm">
               {statusIcons[status]}
             </span>
             <div className="pb-6">

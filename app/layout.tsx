@@ -1,4 +1,3 @@
-import "mapbox-gl/dist/mapbox-gl.css";
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -7,8 +6,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://cleanmap-hyderabad.vercel.app"
   ),
-  title: "CleanMap Hyderabad",
-  description: "Community-reported cleanup spots across Hyderabad.",
+  title: {
+    default: "CleanMap Hyderabad",
+    template: "%s — CleanMap Hyderabad"
+  },
+  description: "Report garbage. Track cleanups. Prove Hyderabad cares.",
   openGraph: {
     siteName: "CleanMap Hyderabad",
     type: "website"

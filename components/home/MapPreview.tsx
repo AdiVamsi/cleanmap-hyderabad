@@ -26,7 +26,7 @@ export function MapPreview({ spots }: MapPreviewProps) {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest">
               Live public map
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink sm:text-4xl">
@@ -40,7 +40,7 @@ export function MapPreview({ spots }: MapPreviewProps) {
             <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-700">
               Planned
             </span>
-            <span className="rounded-full bg-green-100 px-3 py-1 text-green-700">
+            <span className="rounded-full bg-green-100 px-3 py-1 text-forest">
               Cleaned
             </span>
           </div>

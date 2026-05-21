@@ -10,6 +10,7 @@
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.2.8",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.47.10",
     "browser-image-compression": "^2.0.2",

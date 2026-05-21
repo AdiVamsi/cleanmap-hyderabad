@@ -17,7 +17,7 @@ export function StoriesTeaser({ stories }: StoriesTeaserProps) {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest">
               Cleanup Stories
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink sm:text-4xl">
@@ -26,7 +26,7 @@ export function StoriesTeaser({ stories }: StoriesTeaserProps) {
           </div>
           <Link
             href="/stories"
-            className="text-sm font-bold text-civic hover:underline"
+            className="text-sm font-bold text-forest hover:underline"
           >
             See all →
           </Link>

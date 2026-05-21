@@ -11,13 +11,13 @@ export function ImpactSection({ pairs }: ImpactSectionProps) {
   }
 
   return (
-    <section className="bg-[#f8faf7] px-4 py-16 sm:px-6 lg:px-8">
+    <section className="bg-parchment px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-forest">
             Before and after
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-extrabold text-ink sm:text-5xl">
             Cleanups already completed
           </h2>
         </div>

@@ -40,6 +40,10 @@ export function SpotQueue({ spots }: SpotQueueProps) {
     activeTab === "all"
       ? spots
       : spots.filter((spot) => spot.status === activeTab);
+  const aiCount = spots.filter(
+    (spot) =>
+      spot.status === "pending" && spot.admin_note?.includes("AI flagged")
+  ).length;
   const emptyLabel =
     activeTab === "all" ? "all" : STATUS_LABELS[activeTab].toLowerCase();
 
@@ -48,7 +52,7 @@ export function SpotQueue({ spots }: SpotQueueProps) {
       <div className="mb-4 text-sm font-semibold text-slate-500">
         {spots.length} total spots in the admin queue
       </div>
-      <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
+      <div className="flex gap-1 overflow-x-auto border-b border-warm-border">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.status;
 
@@ -59,7 +63,7 @@ export function SpotQueue({ spots }: SpotQueueProps) {
               onClick={() => setActiveTab(tab.status)}
               className={`-mb-px inline-flex items-center gap-2 rounded-t-lg border px-4 py-3 text-sm font-bold transition ${
                 isActive
-                  ? "border-slate-200 border-b-white bg-white text-ink"
+                  ? "border-warm-border border-b-white bg-white text-ink"
                   : "border-transparent text-slate-500 hover:bg-white/70 hover:text-ink"
               }`}
             >
@@ -78,7 +82,13 @@ export function SpotQueue({ spots }: SpotQueueProps) {
         })}
       </div>
 
-      <div className="rounded-b-lg border border-t-0 border-slate-200 bg-white/70 p-4">
+      <div className="rounded-b-lg border border-t-0 border-warm-border bg-white/70 p-4">
+        {activeTab === "pending" && aiCount > 0 ? (
+          <p className="mb-3 rounded-md bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
+            {aiCount} spot{aiCount !== 1 ? "s" : ""} need manual photo review
+          </p>
+        ) : null}
+
         {visibleSpots.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {visibleSpots.map((spot) => (

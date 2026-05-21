@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
+import { SeverityBadge } from "@/components/spots/SeverityBadge";
 import {
-  SEVERITY_COLORS,
-  SEVERITY_LABELS,
   STATUS_COLORS,
   STATUS_LABELS
 } from "@/lib/constants";
@@ -123,7 +122,7 @@ function actionClass(variant: ActionDefinition["variant"]) {
     return "border border-slate-300 bg-white text-ink hover:bg-slate-50";
   }
 
-  return "bg-civic text-white hover:bg-teal-700";
+  return "bg-forest text-white hover:bg-forest-dark";
 }
 
 function PhotoSlot({
@@ -144,7 +143,7 @@ function PhotoSlot({
   }
 
   return (
-    <figure className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+    <figure className="overflow-hidden rounded-lg border border-warm-border bg-slate-100">
       <div className="aspect-video">
         <img
           src={photo.public_url}
@@ -404,7 +403,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
   return (
     <section className="grid gap-6 lg:grid-cols-3">
       <div className="grid gap-6 lg:col-span-2">
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
             <span
               className="rounded-full px-3 py-1 text-xs font-bold text-white"
@@ -412,31 +411,28 @@ export function StatusPanel({ spot }: StatusPanelProps) {
             >
               {STATUS_LABELS[spot.status]}
             </span>
-            <span
-              className="rounded-full px-3 py-1 text-xs font-bold text-white"
-              style={{ backgroundColor: SEVERITY_COLORS[spot.severity] }}
-            >
-              {SEVERITY_LABELS[spot.severity]}
-            </span>
+            <SeverityBadge severity={spot.severity} />
           </div>
 
           <h1 className="mt-4 text-4xl font-bold tracking-normal text-ink">
             {spot.title}
           </h1>
-          <p className="mt-3 text-base font-semibold text-civic">{spot.ward}</p>
+          <p className="mt-3 text-base font-semibold text-forest">
+            {spot.ward}
+          </p>
           <p className="mt-2 text-base leading-7 text-slate-600">
             {spot.address}
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-ink">Description</h2>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">
             {spot.description}
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-ink">Photos</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <PhotoSlot photo={photos.before} type="before" />
@@ -444,7 +440,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-ink">Status history</h2>
           {spot.history.length > 0 ? (
             <ol className="mt-4 grid gap-3">
@@ -481,7 +477,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
       </div>
 
       <aside className="grid gap-6 self-start">
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-ink">Reporter</h2>
           <div className="mt-4 grid gap-3 text-sm text-slate-600">
             <p>
@@ -493,7 +489,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
               {spot.reported_by_phone ? (
                 <a
                   href={`tel:${spot.reported_by_phone}`}
-                  className="font-semibold text-civic hover:underline"
+                  className="font-semibold text-forest hover:underline"
                 >
                   {spot.reported_by_phone}
                 </a>
@@ -513,7 +509,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-ink">Actions</h2>
           {actions.length > 0 ? (
             <div className="mt-4 grid gap-3">
@@ -535,7 +531,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
               {activeAction ? (
                 <form
                   onSubmit={handleSubmit}
-                  className="mt-2 grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4"
+                  className="mt-2 grid gap-4 rounded-lg border border-warm-border bg-slate-50 p-4"
                 >
                   {activeAction.requiresDate ? (
                     <label className="grid gap-2">
@@ -548,7 +544,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                         type="date"
                         min={today}
                         required
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+                        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
                       />
                     </label>
                   ) : null}
@@ -582,7 +578,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                       value={note}
                       onChange={(event) => setNote(event.target.value)}
                       rows={4}
-                      className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+                      className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
                     />
                   </label>
 
@@ -620,7 +616,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
         </div>
 
         {spot.status === "cleaned" && !photos.after ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
             <h2 className="text-lg font-bold text-ink">After photo</h2>
             <p className="mt-2 text-sm text-slate-500">
               Upload an after photo to complete the impact record.
@@ -646,7 +642,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
               type="button"
               disabled={!photoFile || uploading}
               onClick={handleStandalonePhotoUpload}
-              className="mt-4 w-full rounded-md bg-civic px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-4 w-full rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-forest-dark disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               {uploading ? "Uploading..." : "Upload after photo"}
             </button>
@@ -654,7 +650,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
         ) : null}
 
         {spot.status === "cleaned" && photos.before && photos.after ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-warm-border bg-white p-6 shadow-sm">
             <h2 className="text-lg font-bold text-ink">Cleanup Story</h2>
 
             {!spot.story && !storyDraft ? (
@@ -667,7 +663,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                   type="button"
                   onClick={handleGenerateStory}
                   disabled={storyLoading}
-                  className="mt-4 w-full rounded-md bg-civic px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className="mt-4 w-full rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-forest-dark disabled:cursor-not-allowed disabled:bg-slate-400"
                 >
                   {storyLoading ? "Generating..." : "Generate Story"}
                 </button>
@@ -683,7 +679,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                   <input
                     value={storyHeadline}
                     onChange={(event) => setStoryHeadline(event.target.value)}
-                    className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
                   />
                 </label>
                 <label className="grid gap-2">
@@ -694,7 +690,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                     value={storyCaption}
                     onChange={(event) => setStoryCaption(event.target.value)}
                     rows={5}
-                    className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
                   />
                 </label>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -710,7 +706,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                     type="button"
                     onClick={() => saveStory(true)}
                     disabled={storySaving}
-                    className="rounded-md bg-civic px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    className="rounded-md bg-forest px-4 py-3 text-sm font-bold text-white transition hover:bg-forest-dark disabled:cursor-not-allowed disabled:bg-slate-400"
                   >
                     {storySaving ? "Publishing..." : "Publish"}
                   </button>
@@ -720,7 +716,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
 
             {spot.story?.published && !storyDraft ? (
               <div className="mt-4 grid gap-4">
-                <span className="w-fit rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                <span className="w-fit rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-forest">
                   Published
                 </span>
                 <p className="text-base font-bold leading-6 text-ink">
@@ -728,7 +724,7 @@ export function StatusPanel({ spot }: StatusPanelProps) {
                 </p>
                 <Link
                   href={`/stories/${spot.story.id}`}
-                  className="text-sm font-bold text-civic hover:underline"
+                  className="text-sm font-bold text-forest hover:underline"
                 >
                   View story →
                 </Link>

@@ -43,10 +43,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8faf7] px-4 py-6 text-ink sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-parchment px-4 py-6 text-ink sm:px-6 lg:px-8">
       <Link
         href="/"
-        className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-civic hover:text-civic"
+        className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-forest hover:text-forest"
       >
         ← Public site
       </Link>
@@ -54,9 +54,9 @@ export default function AdminLoginPage() {
       <section className="mx-auto flex min-h-[calc(100vh-96px)] max-w-md items-center justify-center">
         <form
           onSubmit={handleSubmit}
-          className="w-full rounded-lg border border-slate-200 bg-white p-6 shadow-soft"
+          className="w-full rounded-lg border border-warm-border bg-white p-6 shadow-soft"
         >
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest">
             Coordinator access
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-normal text-ink">
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type="password"
-              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
               required
               autoComplete="current-password"
             />

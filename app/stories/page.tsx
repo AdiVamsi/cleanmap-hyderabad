@@ -115,18 +115,18 @@ export default async function StoriesPage() {
   const stories = await getStories();
 
   return (
-    <main className="min-h-screen bg-[#f8faf7] text-ink">
+    <main className="min-h-screen bg-parchment text-ink">
       <nav className="mx-auto flex max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-civic hover:text-civic"
+          className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-forest hover:text-forest"
         >
           ← CleanMap Hyderabad
         </Link>
       </nav>
 
       <section className="mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 lg:px-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest">
           Volunteer impact
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-normal text-ink sm:text-5xl">

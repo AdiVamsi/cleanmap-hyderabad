@@ -1,17 +1,15 @@
-"use client";
-
 import Link from "next/link";
 
-import { ReportForm } from "@/components/report/ReportForm";
+import { LocationGate } from "@/components/report/LocationGate";
 
 export default function ReportPage() {
   return (
-    <main className="min-h-screen bg-[#f8faf7] px-4 py-6 text-ink sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-parchment px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <header className="flex items-center justify-between gap-4">
           <Link
             href="/"
-            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-civic hover:text-civic"
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-forest hover:text-forest"
           >
             CleanMap Hyderabad
           </Link>
@@ -22,7 +20,7 @@ export default function ReportPage() {
 
         <section className="grid gap-10 lg:grid-cols-[0.85fr_1.25fr] lg:items-start">
           <div className="pt-4 lg:sticky lg:top-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-civic">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest">
               Report a spot
             </p>
             <h1 className="mt-4 text-4xl font-bold tracking-normal text-ink sm:text-5xl">
@@ -34,7 +32,7 @@ export default function ReportPage() {
             </p>
           </div>
 
-          <ReportForm />
+          <LocationGate />
         </section>
       </div>
     </main>

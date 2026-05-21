@@ -6,6 +6,15 @@ import {
   WARD_COORDINATES,
   type HyderabadWard
 } from "@/lib/constants";
+import {
+  analyzePhotoWithGemini,
+  EMPTY_PHOTO_ANALYSIS,
+  type PhotoAnalysisResult
+} from "@/lib/photo-analysis";
+import {
+  getPhotoUploadQuota,
+  recordPhotoUpload
+} from "@/lib/report-quota";
 import { createServiceRoleClient, hasServiceRoleEnv } from "@/lib/supabase";
 import type {
   ImpactPair,
@@ -17,6 +26,8 @@ import type {
   SpotCounts
 } from "@/lib/types";
 import { uploadSpotPhoto } from "@/lib/upload-photo";
+
+import { notifyAdminNewSpot } from "./notify";
 
 export const runtime = "nodejs";
 
@@ -244,7 +255,11 @@ export async function POST(request: NextRequest) {
     const severity = cleanText(formData.get("severity"));
     const reportedByName =
       cleanText(formData.get("reported_by_name")) || "Anonymous";
-    const reportedByPhone = cleanText(formData.get("reported_by_phone"));
+    const photo = formData.get("photo");
+    const hasPhoto = photo instanceof File && photo.size > 0;
+    const photoBuffer = hasPhoto
+      ? Buffer.from(await photo.arrayBuffer())
+      : null;
 
     if (
       !title ||
@@ -269,8 +284,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const quota = hasPhoto ? getPhotoUploadQuota(request) : null;
+
+    if (quota?.exceeded) {
+      return NextResponse.json(
+        {
+          error:
+            "This device has reached the 5 photo reports limit for the next 24 hours."
+        },
+        { status: 429 }
+      );
+    }
+
     const coordinates = WARD_COORDINATES[ward as HyderabadWard];
     const supabase = createServiceRoleClient();
+    let analysis: PhotoAnalysisResult = {
+      ...EMPTY_PHOTO_ANALYSIS,
+      is_genuine: true,
+      confidence: "low"
+    };
+    const aiReviewed = Boolean(hasPhoto && process.env.GEMINI_API_KEY);
+
+    if (photoBuffer && photo instanceof File && process.env.GEMINI_API_KEY) {
+      try {
+        analysis = await analyzePhotoWithGemini({
+          base64: photoBuffer.toString("base64"),
+          mimeType: photo.type || "image/jpeg"
+        });
+      } catch (analysisError) {
+        console.error("Server photo validation failed", analysisError);
+        analysis = EMPTY_PHOTO_ANALYSIS;
+      }
+    }
+
+    const autoApprove =
+      hasPhoto && analysis.is_genuine === true && analysis.confidence === "high";
+    const initialStatus = autoApprove ? "approved" : "pending";
+
+    // Duplicate-proximity escalation is disabled until users can provide real GPS
+    // coordinates. Ward centroids share the same lat/lon for every spot in a ward,
+    // so the 100m bounding box would incorrectly escalate every report in the same
+    // ward. Re-enable once optional GPS input is added to the report form.
+    const finalSeverity: Severity = severity;
+
     const { data: spot, error: spotError } = await supabase
       .from("spots")
       .insert({
@@ -278,12 +334,16 @@ export async function POST(request: NextRequest) {
         description,
         address,
         ward,
-        severity,
+        severity: finalSeverity,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        status: "pending",
+        status: initialStatus,
         reported_by_name: reportedByName,
-        reported_by_phone: reportedByPhone || null
+        reported_by_phone: null,
+        admin_note:
+          aiReviewed && !autoApprove
+            ? `AI flagged for review (confidence: ${analysis.confidence})`
+            : null
       })
       .select("id")
       .single();
@@ -297,29 +357,53 @@ export async function POST(request: NextRequest) {
       .insert({
         spot_id: spot.id,
         from_status: null,
-        to_status: "pending",
-        note: "Submitted through public report form"
+        to_status: initialStatus,
+        note: autoApprove
+          ? "Auto-approved by AI — genuine waste photo confirmed"
+          : aiReviewed
+            ? "Pending admin review — AI confidence was not high"
+            : "Submitted for review"
       });
 
     if (historyError) {
       throw historyError;
     }
 
-    const photo = formData.get("photo");
-
-    if (photo instanceof File && photo.size > 0) {
+    if (photoBuffer) {
       await uploadSpotPhoto({
-        buffer: Buffer.from(await photo.arrayBuffer()),
+        buffer: photoBuffer,
         spotId: spot.id,
         type: "before",
-        contentType: photo.type || "image/jpeg"
+        contentType:
+          photo instanceof File ? photo.type || "image/jpeg" : "image/jpeg"
       });
     }
 
-    return NextResponse.json({
+    if (initialStatus === "pending") {
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin;
+
+      notifyAdminNewSpot({
+        spotId: spot.id,
+        title,
+        ward,
+        severity: finalSeverity,
+        siteUrl
+      }).catch(() => {});
+    }
+
+    const response = NextResponse.json({
       id: spot.id,
-      message: "Report submitted"
+      message: "Report submitted",
+      status: initialStatus,
+      auto_approved: autoApprove
     });
+
+    if (photoBuffer && quota) {
+      recordPhotoUpload(response, quota);
+    }
+
+    return response;
   } catch (error) {
     console.error("Failed to submit spot", error);
     return NextResponse.json(

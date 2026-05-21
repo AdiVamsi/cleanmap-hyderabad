@@ -1,8 +1,7 @@
 import Link from "next/link";
 
+import { SeverityBadge } from "@/components/spots/SeverityBadge";
 import {
-  SEVERITY_COLORS,
-  SEVERITY_LABELS,
   STATUS_COLORS,
   STATUS_LABELS
 } from "@/lib/constants";
@@ -22,7 +21,7 @@ function formatDate(value: string) {
 
 export function AdminSpotCard({ spot }: AdminSpotCardProps) {
   return (
-    <article className="flex min-h-full flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="flex min-h-full flex-col rounded-lg border border-warm-border bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className="rounded-full px-3 py-1 text-xs font-bold text-white"
@@ -30,18 +29,18 @@ export function AdminSpotCard({ spot }: AdminSpotCardProps) {
         >
           {STATUS_LABELS[spot.status]}
         </span>
-        <span
-          className="rounded-full px-3 py-1 text-xs font-bold text-white"
-          style={{ backgroundColor: SEVERITY_COLORS[spot.severity] }}
-        >
-          {SEVERITY_LABELS[spot.severity]}
-        </span>
+        <SeverityBadge severity={spot.severity} />
+        {spot.admin_note?.includes("AI flagged") ? (
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+            AI Review Needed
+          </span>
+        ) : null}
       </div>
 
       <h2 className="mt-4 line-clamp-2 min-h-[3.5rem] text-xl font-bold tracking-normal text-ink">
         {spot.title}
       </h2>
-      <p className="mt-2 text-sm font-semibold text-civic">{spot.ward}</p>
+      <p className="mt-2 text-sm font-semibold text-forest">{spot.ward}</p>
       <p className="mt-2 line-clamp-1 text-sm text-slate-600">
         {spot.address}
       </p>
@@ -56,7 +55,7 @@ export function AdminSpotCard({ spot }: AdminSpotCardProps) {
           {spot.reported_by_phone ? (
             <a
               href={`tel:${spot.reported_by_phone}`}
-              className="font-semibold text-civic hover:underline"
+              className="font-semibold text-forest hover:underline"
             >
               {spot.reported_by_phone}
             </a>

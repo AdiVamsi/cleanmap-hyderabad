@@ -24,6 +24,8 @@ type AnalysisResult = {
   severity: SeverityValue | null;
   suggested_title: string | null;
   suggested_description: string | null;
+  is_genuine: boolean;
+  confidence: "high" | "medium" | "low";
 };
 
 const requiredFields = [
@@ -52,6 +54,7 @@ export function ReportForm() {
   const [severity, setSeverity] = useState<SeverityValue | "">("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
+  const [autoApproved, setAutoApproved] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -202,12 +205,16 @@ export function ReportForm() {
         method: "POST",
         body: formData
       });
-      const body = (await response.json()) as { error?: string };
+      const body = (await response.json()) as {
+        auto_approved?: boolean;
+        error?: string;
+      };
 
       if (!response.ok) {
         throw new Error(body.error ?? "Unable to submit report.");
       }
 
+      setAutoApproved(body.auto_approved === true);
       setState("success");
       formRef.current?.reset();
       setTitle("");
@@ -228,14 +235,36 @@ export function ReportForm() {
 
   if (state === "success") {
     return (
-      <section className="rounded-lg border border-green-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
-          Submitted
-        </p>
-        <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink">
-          Your report is submitted and under review. We&apos;ll clean it up
-          soon.
-        </h2>
+      <section
+        className={`rounded-lg border bg-white p-8 shadow-sm ${
+          autoApproved ? "border-green-200" : "border-amber-200"
+        }`}
+      >
+        {autoApproved ? (
+          <>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest">
+              Live on the map
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink">
+              Your report is live. The map is updated.
+            </h2>
+            <p className="mt-3 text-base text-slate-600">
+              Share it with your community.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
+              Under Review
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink">
+              Report submitted for review.
+            </h2>
+            <p className="mt-3 text-base text-slate-600">
+              Our team will verify and publish it shortly.
+            </p>
+          </>
+        )}
       </section>
     );
   }
@@ -244,12 +273,15 @@ export function ReportForm() {
     <form
       ref={formRef}
       onSubmit={handleSubmit}
-      className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-7"
+      className="rounded-lg border border-warm-border bg-white p-5 shadow-sm sm:p-6 lg:p-7"
     >
       <div className="grid gap-5">
         <div className="grid gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
           <p className="text-sm font-semibold text-orange-800">
             Photo will be reviewed by admin before going public.
+          </p>
+          <p className="text-xs font-semibold text-orange-700">
+            Limit: 5 photo reports per device in 24 hours.
           </p>
           <label className="grid gap-2">
             <span className="text-sm font-bold text-slate-700">
@@ -260,7 +292,7 @@ export function ReportForm() {
               type="file"
               accept="image/*"
               onChange={handlePhotoChange}
-              className="rounded-md border border-slate-300 bg-white px-3 py-3 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-civic file:px-4 file:py-2 file:text-sm file:font-bold file:text-white"
+              className="rounded-md border border-slate-300 bg-white px-3 py-3 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-forest file:px-4 file:py-2 file:text-sm file:font-bold file:text-white"
             />
           </label>
 
@@ -273,7 +305,7 @@ export function ReportForm() {
           ) : null}
 
           {isAnalyzing ? (
-            <p className="text-sm font-semibold text-civic">
+            <p className="text-sm font-semibold text-forest">
               AI is reading your photo...
             </p>
           ) : null}
@@ -286,7 +318,7 @@ export function ReportForm() {
         </div>
 
         {aiSuggested && !isAnalyzing ? (
-          <p className="rounded-md bg-teal-50 px-4 py-3 text-sm font-semibold text-civic">
+          <p className="rounded-md bg-forest/10 px-4 py-3 text-sm font-semibold text-forest">
             Fields filled based on your photo — review and edit before
             submitting.
           </p>
@@ -299,7 +331,7 @@ export function ReportForm() {
             type="text"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+            className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
             required
           />
         </label>
@@ -311,7 +343,7 @@ export function ReportForm() {
             rows={4}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+            className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
             required
           />
         </label>
@@ -321,7 +353,7 @@ export function ReportForm() {
             <span className="text-sm font-bold text-slate-700">Area/Ward</span>
             <select
               name="ward"
-              className="rounded-md border border-slate-300 bg-white px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+              className="rounded-md border border-slate-300 bg-white px-3 py-3 text-base outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
               required
               defaultValue=""
             >
@@ -341,7 +373,7 @@ export function ReportForm() {
             <input
               name="address"
               type="text"
-              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
+              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/20"
               required
             />
           </label>
@@ -357,7 +389,7 @@ export function ReportForm() {
             {SEVERITY_OPTIONS.map((severityValue) => (
               <label
                 key={severityValue}
-                className="grid min-h-[92px] cursor-pointer grid-cols-[auto_1fr] items-start gap-3 rounded-md border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700 transition hover:border-civic/60 hover:bg-slate-50 has-[:checked]:border-civic has-[:checked]:bg-teal-50 has-[:checked]:shadow-sm"
+                className="grid min-h-[92px] cursor-pointer grid-cols-[auto_1fr] items-start gap-3 rounded-md border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700 transition hover:border-forest/60 hover:bg-slate-50 has-[:checked]:border-forest has-[:checked]:bg-forest/10 has-[:checked]:shadow-sm"
               >
                 <input
                   name="severity"
@@ -365,7 +397,7 @@ export function ReportForm() {
                   value={severityValue}
                   checked={severity === severityValue}
                   onChange={() => setSeverity(severityValue)}
-                  className="mt-1 h-4 w-4 shrink-0 accent-civic"
+                  className="mt-1 h-4 w-4 shrink-0 accent-forest"
                   required
                 />
                 <div className="grid min-w-0 gap-1">

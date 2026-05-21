@@ -148,19 +148,19 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
   const shareText = `${story.headline}\n${publicUrl(`/stories/${story.id}`)}`;
 
   return (
-    <main className="min-h-screen bg-[#f8faf7] px-4 py-6 text-ink sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-parchment px-4 py-6 text-ink sm:px-6 lg:px-8">
       <article className="mx-auto max-w-4xl">
         <nav className="mb-8">
           <Link
             href="/"
-            className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-civic hover:text-civic"
+            className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-forest hover:text-forest"
           >
             ← CleanMap Hyderabad
           </Link>
         </nav>
 
         {story.before_photo_url ? (
-          <figure className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <figure className="overflow-hidden rounded-lg border border-warm-border bg-white shadow-sm">
             <img
               src={story.before_photo_url}
               alt={`${story.headline} before cleanup`}
@@ -173,7 +173,7 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
         ) : null}
 
         {story.after_photo_url ? (
-          <figure className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <figure className="mt-5 overflow-hidden rounded-lg border border-warm-border bg-white shadow-sm">
             <img
               src={story.after_photo_url}
               alt={`${story.headline} after cleanup`}
@@ -185,12 +185,12 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           </figure>
         ) : null}
 
-        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <h1 className="text-4xl font-bold tracking-normal text-ink sm:text-5xl">
             {story.headline}
           </h1>
           <div className="mt-5 flex flex-wrap gap-2">
-            <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-civic">
+            <span className="rounded-full bg-forest/10 px-3 py-1 text-xs font-bold text-forest">
               {story.spot.ward}
             </span>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
@@ -201,7 +201,7 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
             {story.caption}
           </p>
           {story.spot.cleanup_date ? (
-            <p className="mt-5 rounded-md bg-green-50 px-4 py-3 text-sm font-bold text-green-700">
+            <p className="mt-5 rounded-md bg-forest/10 px-4 py-3 text-sm font-bold text-forest">
               Cleaned on {formatDate(story.spot.cleanup_date)}
             </p>
           ) : null}
@@ -209,7 +209,7 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href={`/spots/${story.spot_id}`}
-              className="inline-flex rounded-md border border-slate-200 px-5 py-3 text-sm font-bold text-ink transition hover:bg-slate-50"
+              className="inline-flex rounded-md border border-warm-border px-5 py-3 text-sm font-bold text-ink transition hover:bg-slate-50"
             >
               View original spot →
             </Link>
@@ -224,7 +224,7 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           </div>
         </section>
 
-        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-lg border border-warm-border bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-2xl font-bold tracking-normal text-ink">
               Report another spot

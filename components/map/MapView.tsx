@@ -1,5 +1,7 @@
 "use client";
 
+import "mapbox-gl/dist/mapbox-gl.css";
+
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
@@ -9,29 +11,34 @@ import {
   STATUS_COLORS,
   STATUS_LABELS
 } from "@/lib/constants";
-import type { PublicSpot } from "@/lib/types";
+import type { PublicSpot, PublicSpotStatus, Severity } from "@/lib/types";
 
 type MapViewProps = {
   spots: PublicSpot[];
 };
 
-function createMarkerElement(color: string) {
-  const element = document.createElement("button");
-  element.type = "button";
-  element.setAttribute("aria-label", "Cleanup spot");
-  element.style.backgroundColor = color;
-  element.className =
-    "h-5 w-5 rounded-full border-2 border-white shadow-lg ring-4 ring-white/50 transition hover:scale-110";
+type PopupSpot = Pick<
+  PublicSpot,
+  "id" | "title" | "ward" | "address" | "severity" | "status"
+>;
 
-  return element;
-}
+type SpotFeatureProperties = {
+  id: string;
+  title: string;
+  ward: string;
+  address: string;
+  severity: Severity;
+  status: PublicSpotStatus;
+  statusColor: string;
+  severityColor: string;
+};
 
-function createPopupContent(spot: PublicSpot) {
+function createPopupContent(spot: PopupSpot) {
   const wrapper = document.createElement("div");
   wrapper.className = "w-64 p-4";
 
   const ward = document.createElement("p");
-  ward.className = "text-sm font-bold text-civic";
+  ward.className = "text-sm font-bold text-forest";
   ward.textContent = spot.ward;
 
   const title = document.createElement("h3");
@@ -55,21 +62,68 @@ function createPopupContent(spot: PublicSpot) {
   status.style.backgroundColor = STATUS_COLORS[spot.status];
   status.textContent = STATUS_LABELS[spot.status];
 
-  const soon = document.createElement("p");
-  soon.className =
-    "mt-4 rounded-md bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500";
-  soon.textContent = "Spot page coming soon";
+  const link = document.createElement("a");
+  link.className =
+    "mt-4 block w-full rounded-md bg-ink px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-slate-700";
+  link.href = `/spots/${spot.id}`;
+  link.textContent = "View spot →";
 
   chips.append(severity, status);
-  wrapper.append(ward, title, address, chips, soon);
+  wrapper.append(ward, title, address, chips, link);
 
   return wrapper;
+}
+
+function getSpotFeatureCollection(spots: PublicSpot[]) {
+  return {
+    type: "FeatureCollection",
+    features: spots.map((spot) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [spot.longitude, spot.latitude]
+      },
+      properties: {
+        id: spot.id,
+        title: spot.title,
+        ward: spot.ward,
+        address: spot.address,
+        severity: spot.severity,
+        status: spot.status,
+        statusColor: STATUS_COLORS[spot.status],
+        severityColor: SEVERITY_COLORS[spot.severity]
+      }
+    }))
+  } satisfies GeoJSON.FeatureCollection<GeoJSON.Point, SpotFeatureProperties>;
+}
+
+function updateSpotSource(map: mapboxgl.Map, spots: PublicSpot[]) {
+  const source = map.getSource("spots") as mapboxgl.GeoJSONSource | undefined;
+
+  if (!source) {
+    return;
+  }
+
+  source.setData(getSpotFeatureCollection(spots));
+}
+
+function fitMapToSpots(map: mapboxgl.Map, spots: PublicSpot[]) {
+  if (spots.length === 0) {
+    return;
+  }
+
+  const bounds = new mapboxgl.LngLatBounds();
+  spots.forEach((spot) => bounds.extend([spot.longitude, spot.latitude]));
+  map.fitBounds(bounds, {
+    padding: 72,
+    maxZoom: 13
+  });
 }
 
 export function MapView({ spots }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const spotsRef = useRef(spots);
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
   useEffect(() => {
@@ -91,45 +145,140 @@ export function MapView({ spots }: MapViewProps) {
     );
     mapRef.current = map;
 
+    const setPointerCursor = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+
+    const resetCursor = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    const handleClusterClick = (event: mapboxgl.MapMouseEvent) => {
+      const features = map.queryRenderedFeatures(event.point, {
+        layers: ["clusters"]
+      });
+      const feature = features[0];
+      const clusterId = feature?.properties?.cluster_id as number | undefined;
+      const geometry = feature?.geometry as GeoJSON.Point | undefined;
+
+      if (typeof clusterId !== "number" || geometry?.type !== "Point") {
+        return;
+      }
+
+      const source = map.getSource("spots") as mapboxgl.GeoJSONSource;
+      const coordinates = geometry.coordinates as [number, number];
+
+      source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+        if (error || typeof zoom !== "number") {
+          return;
+        }
+
+        map.easeTo({ center: coordinates, zoom });
+      });
+    };
+
+    const handleSpotClick = (event: mapboxgl.MapMouseEvent) => {
+      const feature = map.queryRenderedFeatures(event.point, {
+        layers: ["unclustered-point"]
+      })[0];
+      const geometry = feature?.geometry as GeoJSON.Point | undefined;
+      const properties = feature?.properties as
+        | SpotFeatureProperties
+        | undefined;
+
+      if (!properties || geometry?.type !== "Point") {
+        return;
+      }
+
+      new mapboxgl.Popup({ maxWidth: "320px", offset: 18 })
+        .setLngLat(geometry.coordinates as [number, number])
+        .setDOMContent(createPopupContent(properties))
+        .addTo(map);
+    };
+
+    const handleLoad = () => {
+      map.addSource("spots", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+        cluster: true,
+        clusterMaxZoom: 13,
+        clusterRadius: 48
+      });
+
+      map.addLayer({
+        id: "clusters",
+        type: "circle",
+        source: "spots",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": "#E85D04",
+          "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 50, 30],
+          "circle-opacity": 0.9
+        }
+      });
+
+      map.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: "spots",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": "{point_count_abbreviated}",
+          "text-size": 13,
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"]
+        },
+        paint: { "text-color": "#ffffff" }
+      });
+
+      map.addLayer({
+        id: "unclustered-point",
+        type: "circle",
+        source: "spots",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": ["get", "statusColor"],
+          "circle-radius": 8,
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#ffffff"
+        }
+      });
+
+      map.on("click", "clusters", handleClusterClick);
+      map.on("click", "unclustered-point", handleSpotClick);
+      map.on("mouseenter", "clusters", setPointerCursor);
+      map.on("mouseleave", "clusters", resetCursor);
+      map.on("mouseenter", "unclustered-point", setPointerCursor);
+      map.on("mouseleave", "unclustered-point", resetCursor);
+
+      updateSpotSource(map, spotsRef.current);
+      fitMapToSpots(map, spotsRef.current);
+    };
+
+    map.on("load", handleLoad);
+
     return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
+      map.off("load", handleLoad);
+      map.off("click", "clusters", handleClusterClick);
+      map.off("click", "unclustered-point", handleSpotClick);
+      map.off("mouseenter", "clusters", setPointerCursor);
+      map.off("mouseleave", "clusters", resetCursor);
+      map.off("mouseenter", "unclustered-point", setPointerCursor);
+      map.off("mouseleave", "unclustered-point", resetCursor);
       map.remove();
       mapRef.current = null;
     };
   }, [token]);
 
   useEffect(() => {
+    spotsRef.current = spots;
     const map = mapRef.current;
 
     if (!map) {
       return;
     }
 
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = spots.map((spot) => {
-      const marker = new mapboxgl.Marker({
-        element: createMarkerElement(STATUS_COLORS[spot.status])
-      })
-        .setLngLat([spot.longitude, spot.latitude])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 18 }).setDOMContent(
-            createPopupContent(spot)
-          )
-        )
-        .addTo(map);
-
-      return marker;
-    });
-
-    if (spots.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      spots.forEach((spot) => bounds.extend([spot.longitude, spot.latitude]));
-      map.fitBounds(bounds, {
-        padding: 72,
-        maxZoom: 13
-      });
-    }
+    updateSpotSource(map, spots);
+    fitMapToSpots(map, spots);
   }, [spots]);
 
   if (!token) {
@@ -141,7 +290,7 @@ export function MapView({ spots }: MapViewProps) {
   }
 
   return (
-    <div className="h-[520px] overflow-hidden rounded-lg border border-slate-200 bg-slate-100 shadow-sm">
+    <div className="h-[520px] overflow-hidden rounded-lg border border-warm-border bg-slate-100 shadow-sm">
       <div ref={containerRef} className="h-full w-full" />
     </div>
   );

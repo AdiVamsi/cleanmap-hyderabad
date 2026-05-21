@@ -8,7 +8,7 @@ type StoryCardProps = {
 
 export function StoryCard({ story }: StoryCardProps) {
   return (
-    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <article className="overflow-hidden rounded-lg border border-warm-border bg-white shadow-sm">
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         {story.before_photo_url ? (
           <img
@@ -27,7 +27,7 @@ export function StoryCard({ story }: StoryCardProps) {
         </span>
       </div>
       <div className="p-5">
-        <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-civic">
+        <span className="rounded-full bg-forest/10 px-3 py-1 text-xs font-bold text-forest">
           {story.spot.ward}
         </span>
         <h3 className="mt-4 line-clamp-2 text-xl font-bold tracking-normal text-ink">
@@ -38,7 +38,7 @@ export function StoryCard({ story }: StoryCardProps) {
         </p>
         <Link
           href={`/stories/${story.id}`}
-          className="mt-5 inline-flex text-sm font-bold text-civic hover:underline"
+          className="mt-5 inline-flex text-sm font-bold text-forest hover:underline"
         >
           Read story →
         </Link>

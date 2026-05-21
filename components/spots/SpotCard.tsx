@@ -1,72 +1,50 @@
 import Link from "next/link";
 
-import {
-  SEVERITY_COLORS,
-  SEVERITY_LABELS,
-  STATUS_COLORS,
-  STATUS_LABELS
-} from "@/lib/constants";
+import { SeverityBadge } from "@/components/spots/SeverityBadge";
 import type { PublicSpotWithPhoto } from "@/lib/types";
 
 type SpotCardProps = {
   spot: PublicSpotWithPhoto;
 };
 
-function fallbackImage() {
-  return "/demo-photos/hyderabad-before-market-lane.jpg";
-}
-
 export function SpotCard({ spot }: SpotCardProps) {
-  const cleanupDate = spot.cleanup_date
-    ? new Intl.DateTimeFormat("en-IN", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-      }).format(new Date(spot.cleanup_date))
-    : null;
-
   return (
-    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-        <img
-          src={spot.before_photo_url ?? fallbackImage()}
-          alt={spot.title}
-          className="h-full w-full object-cover"
-          loading="lazy"
-        />
-      </div>
+    <article className="group overflow-hidden rounded-2xl border border-warm-border bg-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-map">
+      {spot.before_photo_url ? (
+        <div className="aspect-[16/9] overflow-hidden bg-stone">
+          <img
+            src={spot.before_photo_url}
+            alt={spot.title}
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        <div className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-stone to-warm-border">
+          <span className="text-3xl opacity-30" aria-hidden="true">
+            📍
+          </span>
+        </div>
+      )}
+
       <div className="p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <span
-            className="rounded-full px-3 py-1 text-xs font-bold text-white"
-            style={{ backgroundColor: STATUS_COLORS[spot.status] }}
-          >
-            {STATUS_LABELS[spot.status]}
-          </span>
-          <span
-            className="rounded-full px-3 py-1 text-xs font-bold text-white"
-            style={{ backgroundColor: SEVERITY_COLORS[spot.severity] }}
-          >
-            {SEVERITY_LABELS[spot.severity]}
+          <SeverityBadge severity={spot.severity} />
+          <span className="rounded-full bg-stone px-2.5 py-1 text-xs font-semibold text-slate-600">
+            {spot.ward}
           </span>
         </div>
 
-        <h3 className="mt-4 line-clamp-2 min-h-[3.5rem] text-xl font-bold tracking-normal text-ink">
+        <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-snug text-ink">
           {spot.title}
         </h3>
-        <p className="mt-3 text-sm font-semibold text-civic">{spot.ward}</p>
-        <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm leading-5 text-slate-600">
+        <p className="mt-1.5 line-clamp-1 text-sm text-slate-500">
           {spot.address}
         </p>
-        {cleanupDate ? (
-          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
-            Cleanup {cleanupDate}
-          </p>
-        ) : null}
 
         <Link
           href={`/spots/${spot.id}`}
-          className="mt-5 block w-full rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-bold text-ink transition hover:bg-slate-50"
+          className="mt-4 block w-full rounded-xl bg-ink px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-slate-700"
         >
           View Spot →
         </Link>
