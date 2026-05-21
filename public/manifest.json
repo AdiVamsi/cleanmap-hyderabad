@@ -1,0 +1,27 @@
+{
+  "name": "CleanMap Hyderabad",
+  "short_name": "CleanMap",
+  "description": "Report garbage. Track cleanups. Prove Hyderabad cares.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFBF5",
+  "theme_color": "#E85D04",
+  "orientation": "portrait-primary",
+  "categories": ["social", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Report a spot",
+      "url": "/report",
+      "description": "Submit a new garbage report"
+    }
+  ]
+}

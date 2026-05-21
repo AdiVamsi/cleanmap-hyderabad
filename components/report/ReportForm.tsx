@@ -18,6 +18,7 @@ import {
 
 type SubmitState = "idle" | "submitting" | "success";
 type SeverityValue = "minor" | "noticeable" | "severe" | "critical";
+type GpsStatus = "idle" | "loading" | "success" | "denied" | "error";
 
 type AnalysisResult = {
   waste_type: string | null;
@@ -55,6 +56,11 @@ export function ReportForm() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
   const [autoApproved, setAutoApproved] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState<GpsStatus>("idle");
+  const [gpsCoords, setGpsCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   useEffect(() => {
     return () => {
@@ -63,6 +69,28 @@ export function ReportForm() {
       }
     };
   }, [previewUrl]);
+
+  function handleGpsRequest() {
+    if (!navigator.geolocation) {
+      setGpsStatus("error");
+      return;
+    }
+
+    setGpsStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setGpsCoords({
+          latitude: coords.latitude,
+          longitude: coords.longitude
+        });
+        setGpsStatus("success");
+      },
+      (err) => {
+        setGpsStatus(err.code === 1 ? "denied" : "error");
+      },
+      { timeout: 10000, maximumAge: 60000 }
+    );
+  }
 
   async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -223,6 +251,8 @@ export function ReportForm() {
       setPhoto(null);
       setPreviewUrl("");
       setAiSuggested(false);
+      setGpsCoords(null);
+      setGpsStatus("idle");
     } catch (submitError) {
       setState("idle");
       setError(
@@ -377,6 +407,69 @@ export function ReportForm() {
               required
             />
           </label>
+        </div>
+
+        <div className="grid gap-2">
+          <span className="text-sm font-bold text-slate-700">
+            Exact location{" "}
+            <span className="font-normal text-slate-400">(optional)</span>
+          </span>
+
+          {gpsStatus === "success" && gpsCoords ? (
+            <div className="flex items-center gap-3 rounded-md border border-forest/30 bg-forest/10 px-4 py-3">
+              <span className="text-base" aria-hidden="true">
+                📍
+              </span>
+              <p className="text-sm font-semibold text-forest">
+                Location pinned — {gpsCoords.latitude.toFixed(5)},{" "}
+                {gpsCoords.longitude.toFixed(5)}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setGpsCoords(null);
+                  setGpsStatus("idle");
+                }}
+                className="ml-auto text-xs font-bold text-slate-500 hover:text-red-600"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleGpsRequest}
+              disabled={gpsStatus === "loading"}
+              className="flex w-fit items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-forest hover:text-forest disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {gpsStatus === "loading"
+                ? "Getting location..."
+                : "📍 Pin my exact location"}
+            </button>
+          )}
+
+          {gpsStatus === "denied" ? (
+            <p className="text-xs font-semibold text-amber-700">
+              Location access denied. The ward centre will be used instead.
+            </p>
+          ) : null}
+
+          {gpsStatus === "error" ? (
+            <p className="text-xs font-semibold text-red-600">
+              Could not get location. Ward centre will be used.
+            </p>
+          ) : null}
+
+          {gpsCoords ? (
+            <>
+              <input type="hidden" name="latitude" value={gpsCoords.latitude} />
+              <input
+                type="hidden"
+                name="longitude"
+                value={gpsCoords.longitude}
+              />
+            </>
+          ) : null}
         </div>
 
         <fieldset className="grid gap-3">

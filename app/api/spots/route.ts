@@ -15,6 +15,11 @@ import {
   getPhotoUploadQuota,
   recordPhotoUpload
 } from "@/lib/report-quota";
+import {
+  bumpSeverity,
+  maxSeverity,
+  toSeverityLevel
+} from "@/lib/severity-utils";
 import { createServiceRoleClient, hasServiceRoleEnv } from "@/lib/supabase";
 import type {
   ImpactPair,
@@ -253,6 +258,14 @@ export async function POST(request: NextRequest) {
     const address = cleanText(formData.get("address"));
     const ward = cleanText(formData.get("ward"));
     const severity = cleanText(formData.get("severity"));
+    const rawLat = cleanText(formData.get("latitude"));
+    const rawLon = cleanText(formData.get("longitude"));
+    const GHMC_LAT_MIN = 17.18;
+    const GHMC_LAT_MAX = 17.62;
+    const GHMC_LON_MIN = 78.18;
+    const GHMC_LON_MAX = 78.65;
+    const parsedLat = rawLat ? Number(rawLat) : NaN;
+    const parsedLon = rawLon ? Number(rawLon) : NaN;
     const reportedByName =
       cleanText(formData.get("reported_by_name")) || "Anonymous";
     const photo = formData.get("photo");
@@ -297,6 +310,15 @@ export async function POST(request: NextRequest) {
     }
 
     const coordinates = WARD_COORDINATES[ward as HyderabadWard];
+    const hasGps =
+      Number.isFinite(parsedLat) &&
+      Number.isFinite(parsedLon) &&
+      parsedLat >= GHMC_LAT_MIN &&
+      parsedLat <= GHMC_LAT_MAX &&
+      parsedLon >= GHMC_LON_MIN &&
+      parsedLon <= GHMC_LON_MAX;
+    const spotLatitude = hasGps ? parsedLat : coordinates.latitude;
+    const spotLongitude = hasGps ? parsedLon : coordinates.longitude;
     const supabase = createServiceRoleClient();
     let analysis: PhotoAnalysisResult = {
       ...EMPTY_PHOTO_ANALYSIS,
@@ -320,12 +342,25 @@ export async function POST(request: NextRequest) {
     const autoApprove =
       hasPhoto && analysis.is_genuine === true && analysis.confidence === "high";
     const initialStatus = autoApprove ? "approved" : "pending";
+    let finalSeverity: Severity = toSeverityLevel(severity);
 
-    // Duplicate-proximity escalation is disabled until users can provide real GPS
-    // coordinates. Ward centroids share the same lat/lon for every spot in a ward,
-    // so the 100m bounding box would incorrectly escalate every report in the same
-    // ward. Re-enable once optional GPS input is added to the report form.
-    const finalSeverity: Severity = severity;
+    if (hasGps) {
+      const { data: nearby } = await supabase
+        .from("spots")
+        .select("id")
+        .neq("status", "rejected")
+        .gte("latitude", spotLatitude - 0.001)
+        .lte("latitude", spotLatitude + 0.001)
+        .gte("longitude", spotLongitude - 0.001)
+        .lte("longitude", spotLongitude + 0.001);
+
+      const nearbyCount = nearby?.length ?? 0;
+      if (nearbyCount >= 3) {
+        finalSeverity = maxSeverity();
+      } else if (nearbyCount >= 1) {
+        finalSeverity = bumpSeverity(finalSeverity);
+      }
+    }
 
     const { data: spot, error: spotError } = await supabase
       .from("spots")
@@ -335,8 +370,8 @@ export async function POST(request: NextRequest) {
         address,
         ward,
         severity: finalSeverity,
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
+        latitude: spotLatitude,
+        longitude: spotLongitude,
         status: initialStatus,
         reported_by_name: reportedByName,
         reported_by_phone: null,

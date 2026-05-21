@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -11,6 +11,16 @@ export const metadata: Metadata = {
     template: "%s — CleanMap Hyderabad"
   },
   description: "Report garbage. Track cleanups. Prove Hyderabad cares.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "CleanMap"
+  },
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/icon.svg"
+  },
   openGraph: {
     siteName: "CleanMap Hyderabad",
     type: "website"
@@ -18,6 +28,10 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image"
   }
+};
+
+export const viewport: Viewport = {
+  themeColor: "#E85D04"
 };
 
 export default function RootLayout({

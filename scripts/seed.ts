@@ -359,17 +359,17 @@ const seedSpots: SeedSpot[] = [
 ];
 
 const BEFORE_DEMO_PHOTOS = [
-  "/demo-photos/hyderabad-before-market-lane.jpg",
-  "/demo-photos/hyderabad-before-colony-drain.jpg",
-  "/demo-photos/hyderabad-before-bus-stop.jpg",
-  "/demo-photos/hyderabad-before-food-stall.jpg"
+  "https://picsum.photos/seed/hyd-before-1/800/600",
+  "https://picsum.photos/seed/hyd-before-2/800/600",
+  "https://picsum.photos/seed/hyd-before-3/800/600",
+  "https://picsum.photos/seed/hyd-before-4/800/600"
 ];
 
 const AFTER_DEMO_PHOTOS = [
-  "/demo-photos/hyderabad-after-market-lane.jpg",
-  "/demo-photos/hyderabad-after-colony-drain.jpg",
-  "/demo-photos/hyderabad-after-bus-stop.jpg",
-  "/demo-photos/hyderabad-after-food-stall.jpg"
+  "https://picsum.photos/seed/hyd-after-1/800/600",
+  "https://picsum.photos/seed/hyd-after-2/800/600",
+  "https://picsum.photos/seed/hyd-after-3/800/600",
+  "https://picsum.photos/seed/hyd-after-4/800/600"
 ];
 
 async function main() {
@@ -464,13 +464,13 @@ async function main() {
         {
           spot_id: spot.id,
           type: "before",
-          storage_path: beforeUrl.replace(/^\//, ""),
+          storage_path: beforeUrl,
           public_url: beforeUrl
         },
         {
           spot_id: spot.id,
           type: "after",
-          storage_path: afterUrl.replace(/^\//, ""),
+          storage_path: afterUrl,
           public_url: afterUrl
         }
       ];
@@ -486,7 +486,7 @@ async function main() {
         {
           spot_id: spot.id,
           type: "before",
-          storage_path: beforeUrl.replace(/^\//, ""),
+          storage_path: beforeUrl,
           public_url: beforeUrl
         }
       ];
