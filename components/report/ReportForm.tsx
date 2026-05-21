@@ -1,6 +1,12 @@
 "use client";
 
-import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useRef,
+  useState
+} from "react";
 import imageCompression from "browser-image-compression";
 
 import {
@@ -10,13 +16,18 @@ import {
 } from "@/lib/constants";
 
 type SubmitState = "idle" | "submitting" | "success";
+type SeverityValue = (typeof SEVERITY_OPTIONS)[number];
+
+type AnalysisResult = {
+  waste_type: string | null;
+  severity: SeverityValue | null;
+  suggested_title: string | null;
+  suggested_description: string | null;
+};
 
 const requiredFields = [
-  ["title", "Spot Title"],
-  ["description", "Description"],
   ["ward", "Area/Ward"],
   ["address", "Address"],
-  ["severity", "Severity"],
   ["reported_by_name", "Your Name"]
 ] as const;
 
@@ -30,11 +41,17 @@ function toUploadFile(file: Blob, originalName: string) {
 
 export function ReportForm() {
   const formRef = useRef<HTMLFormElement | null>(null);
+  const analysisRequestRef = useRef(0);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [isCompressing, setIsCompressing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [severity, setSeverity] = useState<SeverityValue | "">("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiSuggested, setAiSuggested] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -47,6 +64,7 @@ export function ReportForm() {
   async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     setError("");
+    setAiSuggested(false);
 
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -54,11 +72,14 @@ export function ReportForm() {
     }
 
     if (!file) {
+      analysisRequestRef.current += 1;
       setPhoto(null);
+      setIsAnalyzing(false);
       return;
     }
 
     try {
+      analysisRequestRef.current += 1;
       setIsCompressing(true);
       const compressed = await imageCompression(file, {
         maxSizeMB: 1,
@@ -69,8 +90,51 @@ export function ReportForm() {
       const uploadFile = toUploadFile(compressed, file.name);
       setPhoto(uploadFile);
       setPreviewUrl(URL.createObjectURL(uploadFile));
+      setIsCompressing(false);
+
+      const analysisRequestId = analysisRequestRef.current;
+      setIsAnalyzing(true);
+      try {
+        const analysisForm = new FormData();
+        analysisForm.append("file", uploadFile, uploadFile.name);
+        const res = await fetch("/api/ai/analyze-photo", {
+          method: "POST",
+          body: analysisForm
+        });
+
+        if (res.ok) {
+          const result = (await res.json()) as AnalysisResult;
+
+          if (analysisRequestId !== analysisRequestRef.current) {
+            return;
+          }
+
+          if (result.suggested_title) {
+            setTitle(result.suggested_title);
+          }
+
+          if (result.suggested_description) {
+            setDescription(result.suggested_description);
+          }
+
+          if (result.severity) {
+            setSeverity(result.severity);
+          }
+
+          if (result.suggested_title || result.severity) {
+            setAiSuggested(true);
+          }
+        }
+      } catch {
+        // AI failure must not block form submission.
+      } finally {
+        if (analysisRequestId === analysisRequestRef.current) {
+          setIsAnalyzing(false);
+        }
+      }
     } catch {
       setPhoto(null);
+      setIsAnalyzing(false);
       setError("Photo compression failed. Try another image.");
     } finally {
       setIsCompressing(false);
@@ -78,6 +142,18 @@ export function ReportForm() {
   }
 
   function validate(formData: FormData) {
+    if (!title.trim()) {
+      return "Spot Title is required.";
+    }
+
+    if (!description.trim()) {
+      return "Description is required.";
+    }
+
+    if (!severity) {
+      return "Severity is required.";
+    }
+
     for (const [field, label] of requiredFields) {
       const value = formData.get(field);
       const text = typeof value === "string" ? value.trim() : "";
@@ -87,7 +163,7 @@ export function ReportForm() {
       }
     }
 
-    if (!SEVERITY_OPTIONS.includes(formData.get("severity") as never)) {
+    if (!SEVERITY_OPTIONS.includes(severity)) {
       return "Choose a valid severity.";
     }
 
@@ -104,6 +180,9 @@ export function ReportForm() {
     }
 
     const formData = new FormData(event.currentTarget);
+    formData.set("severity", severity);
+    formData.set("title", title);
+    formData.set("description", description);
     const validationError = validate(formData);
 
     if (validationError) {
@@ -131,8 +210,12 @@ export function ReportForm() {
 
       setState("success");
       formRef.current?.reset();
+      setTitle("");
+      setDescription("");
+      setSeverity("");
       setPhoto(null);
       setPreviewUrl("");
+      setAiSuggested(false);
     } catch (submitError) {
       setState("idle");
       setError(
@@ -169,6 +252,8 @@ export function ReportForm() {
           <input
             name="title"
             type="text"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
             className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
             required
           />
@@ -179,6 +264,8 @@ export function ReportForm() {
           <textarea
             name="description"
             rows={4}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
             className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
             required
           />
@@ -217,20 +304,23 @@ export function ReportForm() {
 
         <fieldset className="grid gap-3">
           <legend className="text-sm font-bold text-slate-700">Severity</legend>
+          <input type="hidden" name="severity" value={severity} />
           <div className="grid gap-3 sm:grid-cols-3">
-            {SEVERITY_OPTIONS.map((severity) => (
+            {SEVERITY_OPTIONS.map((severityValue) => (
               <label
-                key={severity}
+                key={severityValue}
                 className="flex cursor-pointer items-center gap-3 rounded-md border border-slate-300 px-3 py-3 text-sm font-semibold text-slate-700 transition has-[:checked]:border-civic has-[:checked]:bg-teal-50"
               >
                 <input
                   name="severity"
                   type="radio"
-                  value={severity}
+                  value={severityValue}
+                  checked={severity === severityValue}
+                  onChange={() => setSeverity(severityValue)}
                   className="h-4 w-4 accent-civic"
                   required
                 />
-                {SEVERITY_LABELS[severity]}
+                {SEVERITY_LABELS[severityValue]}
               </label>
             ))}
           </div>
@@ -277,12 +367,6 @@ export function ReportForm() {
             />
           </label>
 
-          {isCompressing ? (
-            <p className="text-sm font-semibold text-slate-600">
-              Preparing photo...
-            </p>
-          ) : null}
-
           {previewUrl ? (
             <img
               src={previewUrl}
@@ -290,7 +374,26 @@ export function ReportForm() {
               className="h-28 w-28 rounded-md object-cover"
             />
           ) : null}
+
+          {isAnalyzing ? (
+            <p className="text-sm font-semibold text-civic">
+              AI is reading your photo...
+            </p>
+          ) : null}
+
+          {isCompressing ? (
+            <p className="text-sm font-semibold text-slate-600">
+              Preparing photo...
+            </p>
+          ) : null}
         </div>
+
+        {aiSuggested && !isAnalyzing ? (
+          <p className="rounded-md bg-teal-50 px-4 py-3 text-sm font-semibold text-civic">
+            Fields filled based on your photo — review and edit before
+            submitting.
+          </p>
+        ) : null}
 
         {error ? (
           <p className="rounded-md bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">

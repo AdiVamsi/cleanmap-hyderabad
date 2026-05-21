@@ -10,6 +10,7 @@
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.47.10",
     "browser-image-compression": "^2.0.2",
     "mapbox-gl": "^3.9.4",
