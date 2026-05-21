@@ -3,7 +3,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   HYDERABAD_WARDS,
   PUBLIC_STATUSES,
-  SEVERITY_OPTIONS,
   WARD_COORDINATES,
   type HyderabadWard
 } from "@/lib/constants";
@@ -33,7 +32,9 @@ const ZERO_COUNTS: SpotCounts = {
 };
 
 function isSeverity(value: unknown): value is Severity {
-  return SEVERITY_OPTIONS.includes(value as Severity);
+  return ["chhota", "dikkat", "zabardast", "khatarnak"].includes(
+    value as string
+  );
 }
 
 function isPublicStatus(value: string): value is PublicSpotStatus {
@@ -241,7 +242,8 @@ export async function POST(request: NextRequest) {
     const address = cleanText(formData.get("address"));
     const ward = cleanText(formData.get("ward"));
     const severity = cleanText(formData.get("severity"));
-    const reportedByName = cleanText(formData.get("reported_by_name"));
+    const reportedByName =
+      cleanText(formData.get("reported_by_name")) || "Anonymous";
     const reportedByPhone = cleanText(formData.get("reported_by_phone"));
 
     if (
@@ -249,8 +251,7 @@ export async function POST(request: NextRequest) {
       !description ||
       !address ||
       !ward ||
-      !severity ||
-      !reportedByName
+      !severity
     ) {
       return NextResponse.json(
         { error: "Please fill out all required fields" },

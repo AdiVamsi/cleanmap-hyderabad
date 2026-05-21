@@ -1,5 +1,11 @@
 create extension if not exists pgcrypto;
 
+-- Run in Supabase SQL Editor to apply severity migration:
+-- ALTER TABLE spots DROP CONSTRAINT spots_severity_check;
+-- ALTER TABLE spots ADD CONSTRAINT spots_severity_check
+--   CHECK (severity IN ('chhota','dikkat','zabardast','khatarnak'));
+-- ALTER TABLE spots ALTER COLUMN reported_by_name SET DEFAULT 'Anonymous';
+
 create table if not exists spots (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -8,10 +14,10 @@ create table if not exists spots (
   ward text not null,
   latitude float8 not null,
   longitude float8 not null,
-  severity text not null check (severity in ('low', 'medium', 'high')),
+  severity text not null check (severity in ('chhota', 'dikkat', 'zabardast', 'khatarnak')),
   status text not null default 'pending'
     check (status in ('pending', 'approved', 'cleanup_planned', 'cleaned', 'rejected')),
-  reported_by_name text not null,
+  reported_by_name text not null default 'Anonymous',
   reported_by_phone text,
   admin_note text,
   cleanup_date date,

@@ -9,7 +9,7 @@ type SeedSpot = {
   ward: string;
   latitude: number;
   longitude: number;
-  severity: "low" | "medium" | "high";
+  severity: "chhota" | "dikkat" | "zabardast" | "khatarnak";
   status: "approved" | "cleanup_planned" | "cleaned" | "pending";
   cleanup_date?: string | null;
   reported_by_name: string;
@@ -83,7 +83,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Banjara Hills",
     latitude: 17.4128,
     longitude: 78.4476,
-    severity: "high",
+    severity: "zabardast",
     status: "approved",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00001"
@@ -95,7 +95,7 @@ const seedSpots: SeedSpot[] = [
     ward: "KPHB Colony",
     latitude: 17.4937,
     longitude: 78.3989,
-    severity: "medium",
+    severity: "dikkat",
     status: "approved",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00002"
@@ -107,7 +107,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Secunderabad",
     latitude: 17.4404,
     longitude: 78.4991,
-    severity: "medium",
+    severity: "dikkat",
     status: "approved",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00003"
@@ -119,7 +119,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Kukatpally",
     latitude: 17.4952,
     longitude: 78.3918,
-    severity: "high",
+    severity: "zabardast",
     status: "approved",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00004"
@@ -131,7 +131,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Himayatnagar",
     latitude: 17.4028,
     longitude: 78.4846,
-    severity: "low",
+    severity: "chhota",
     status: "approved",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00005"
@@ -143,7 +143,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Madhapur",
     latitude: 17.4482,
     longitude: 78.3912,
-    severity: "medium",
+    severity: "dikkat",
     status: "approved",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00006"
@@ -155,7 +155,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Jubilee Hills",
     latitude: 17.432,
     longitude: 78.4079,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleanup_planned",
     cleanup_date: dateFromNow(4),
     reported_by_name: "CleanMap Seed",
@@ -168,7 +168,7 @@ const seedSpots: SeedSpot[] = [
     ward: "LB Nagar",
     latitude: 17.3479,
     longitude: 78.5474,
-    severity: "high",
+    severity: "zabardast",
     status: "cleanup_planned",
     cleanup_date: dateFromNow(9),
     reported_by_name: "CleanMap Seed",
@@ -181,7 +181,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Madhapur",
     latitude: 17.4487,
     longitude: 78.392,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleanup_planned",
     cleanup_date: dateFromNow(13),
     reported_by_name: "CleanMap Seed",
@@ -194,7 +194,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Himayatnagar",
     latitude: 17.4034,
     longitude: 78.4834,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleanup_planned",
     cleanup_date: dateFromNow(12),
     reported_by_name: "CleanMap Seed",
@@ -207,7 +207,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Banjara Hills",
     latitude: 17.4119,
     longitude: 78.4491,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00011"
@@ -219,7 +219,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Madhapur",
     latitude: 17.4493,
     longitude: 78.3908,
-    severity: "low",
+    severity: "chhota",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00012"
@@ -231,7 +231,7 @@ const seedSpots: SeedSpot[] = [
     ward: "KPHB Colony",
     latitude: 17.4929,
     longitude: 78.4004,
-    severity: "high",
+    severity: "zabardast",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00013"
@@ -243,7 +243,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Secunderabad",
     latitude: 17.4432,
     longitude: 78.4958,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00014"
@@ -255,7 +255,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Kukatpally",
     latitude: 17.4898,
     longitude: 78.3941,
-    severity: "high",
+    severity: "zabardast",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00015"
@@ -267,7 +267,7 @@ const seedSpots: SeedSpot[] = [
     ward: "Jubilee Hills",
     latitude: 17.4314,
     longitude: 78.4086,
-    severity: "low",
+    severity: "chhota",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00016"
@@ -279,7 +279,7 @@ const seedSpots: SeedSpot[] = [
     ward: "LB Nagar",
     latitude: 17.3486,
     longitude: 78.5486,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00017"
@@ -291,10 +291,34 @@ const seedSpots: SeedSpot[] = [
     ward: "Himayatnagar",
     latitude: 17.404,
     longitude: 78.4852,
-    severity: "medium",
+    severity: "dikkat",
     status: "cleaned",
     reported_by_name: "CleanMap Seed",
     reported_by_phone: "+91 90000 00018"
+  },
+  {
+    title: "Cleared drain blockage near nala",
+    description: "A hazardous nala-side pile blocking dirty water flow was cleared before it could overflow into the lane.",
+    address: "LB Nagar nala crossing near Sagar Ring Road",
+    ward: "LB Nagar",
+    latitude: 17.3494,
+    longitude: 78.5469,
+    severity: "khatarnak",
+    status: "cleaned",
+    reported_by_name: "CleanMap Seed",
+    reported_by_phone: "+91 90000 00019"
+  },
+  {
+    title: "Cleared dumping near lake bund",
+    description: "Volunteers removed a critical mixed-waste pile near the lake bund and cleared the walking edge.",
+    address: "Madhapur lake bund service path",
+    ward: "Madhapur",
+    latitude: 17.4501,
+    longitude: 78.3899,
+    severity: "khatarnak",
+    status: "cleaned",
+    reported_by_name: "CleanMap Seed",
+    reported_by_phone: "+91 90000 00020"
   },
   {
     title: "Pending review near apartment lane",
@@ -303,10 +327,10 @@ const seedSpots: SeedSpot[] = [
     ward: "Jubilee Hills",
     latitude: 17.4331,
     longitude: 78.4062,
-    severity: "medium",
+    severity: "dikkat",
     status: "pending",
     reported_by_name: "CleanMap Seed",
-    reported_by_phone: "+91 90000 00019"
+    reported_by_phone: "+91 90000 00021"
   },
   {
     title: "Pending review by main road median",
@@ -315,10 +339,10 @@ const seedSpots: SeedSpot[] = [
     ward: "Secunderabad",
     latitude: 17.4388,
     longitude: 78.4977,
-    severity: "low",
+    severity: "chhota",
     status: "pending",
     reported_by_name: "CleanMap Seed",
-    reported_by_phone: "+91 90000 00020"
+    reported_by_phone: "+91 90000 00022"
   },
   {
     title: "Pending review beside store frontage",
@@ -327,10 +351,10 @@ const seedSpots: SeedSpot[] = [
     ward: "LB Nagar",
     latitude: 17.3468,
     longitude: 78.5488,
-    severity: "high",
+    severity: "zabardast",
     status: "pending",
     reported_by_name: "CleanMap Seed",
-    reported_by_phone: "+91 90000 00021"
+    reported_by_phone: "+91 90000 00023"
   }
 ];
 

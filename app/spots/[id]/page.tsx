@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { StatusTimeline } from "@/components/spots/StatusTimeline";
 import {
+  SEVERITY_COLORS,
   SEVERITY_LABELS,
   STATUS_COLORS,
   STATUS_LABELS
@@ -165,7 +166,10 @@ export default async function SpotDetailPage({ params }: SpotDetailPageProps) {
             >
               {STATUS_LABELS[spot.status]}
             </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+            <span
+              className="rounded-full px-3 py-1 text-xs font-bold text-white"
+              style={{ backgroundColor: SEVERITY_COLORS[spot.severity] }}
+            >
               {SEVERITY_LABELS[spot.severity]}
             </span>
             <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-civic">

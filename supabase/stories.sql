@@ -1,0 +1,4 @@
+-- After running schema.sql changes, also run this migration if existing data exists:
+-- UPDATE spots SET severity = 'dikkat' WHERE severity = 'medium';
+-- UPDATE spots SET severity = 'chhota' WHERE severity = 'low';
+-- UPDATE spots SET severity = 'zabardast' WHERE severity = 'high';

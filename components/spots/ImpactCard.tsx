@@ -1,4 +1,4 @@
-import { SEVERITY_LABELS } from "@/lib/constants";
+import { SEVERITY_COLORS, SEVERITY_LABELS } from "@/lib/constants";
 import type { ImpactPair } from "@/lib/types";
 
 type ImpactCardProps = {
@@ -37,7 +37,10 @@ export function ImpactCard({ pair }: ImpactCardProps) {
           <span className="rounded-full bg-green-100 px-3 py-1 text-green-700">
             Cleaned
           </span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+          <span
+            className="rounded-full px-3 py-1 text-white"
+            style={{ backgroundColor: SEVERITY_COLORS[pair.spot.severity] }}
+          >
             {SEVERITY_LABELS[pair.spot.severity]}
           </span>
         </div>

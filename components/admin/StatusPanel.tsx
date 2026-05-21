@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
 import {
+  SEVERITY_COLORS,
   SEVERITY_LABELS,
   STATUS_COLORS,
   STATUS_LABELS
@@ -311,7 +312,10 @@ export function StatusPanel({ spot }: StatusPanelProps) {
             >
               {STATUS_LABELS[spot.status]}
             </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+            <span
+              className="rounded-full px-3 py-1 text-xs font-bold text-white"
+              style={{ backgroundColor: SEVERITY_COLORS[spot.severity] }}
+            >
               {SEVERITY_LABELS[spot.severity]}
             </span>
           </div>

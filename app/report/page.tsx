@@ -29,8 +29,8 @@ export default function ReportPage() {
               Put a cleanup location on the review list.
             </h1>
             <p className="mt-5 max-w-md text-base leading-7 text-slate-600">
-              Share the address, ward, severity, and an optional before photo.
-              New reports stay private until an admin approves them.
+              Share a photo, address, ward, and severity anonymously. New
+              reports stay private until an admin approves them.
             </p>
           </div>
 

@@ -11,12 +11,13 @@ import imageCompression from "browser-image-compression";
 
 import {
   HYDERABAD_WARDS,
+  SEVERITY_DESCRIPTIONS,
   SEVERITY_LABELS,
   SEVERITY_OPTIONS
 } from "@/lib/constants";
 
 type SubmitState = "idle" | "submitting" | "success";
-type SeverityValue = (typeof SEVERITY_OPTIONS)[number];
+type SeverityValue = "chhota" | "dikkat" | "zabardast" | "khatarnak";
 
 type AnalysisResult = {
   waste_type: string | null;
@@ -27,8 +28,7 @@ type AnalysisResult = {
 
 const requiredFields = [
   ["ward", "Area/Ward"],
-  ["address", "Address"],
-  ["reported_by_name", "Your Name"]
+  ["address", "Address"]
 ] as const;
 
 function toUploadFile(file: Blob, originalName: string) {
@@ -247,6 +247,51 @@ export function ReportForm() {
       className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
     >
       <div className="grid gap-5">
+        <div className="grid gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
+          <p className="text-sm font-semibold text-orange-800">
+            Photo will be reviewed by admin before going public.
+          </p>
+          <label className="grid gap-2">
+            <span className="text-sm font-bold text-slate-700">
+              Before Photo
+            </span>
+            <input
+              name="photo"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="rounded-md border border-slate-300 bg-white px-3 py-3 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-civic file:px-4 file:py-2 file:text-sm file:font-bold file:text-white"
+            />
+          </label>
+
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Selected cleanup spot"
+              className="h-28 w-28 rounded-md object-cover"
+            />
+          ) : null}
+
+          {isAnalyzing ? (
+            <p className="text-sm font-semibold text-civic">
+              AI is reading your photo...
+            </p>
+          ) : null}
+
+          {isCompressing ? (
+            <p className="text-sm font-semibold text-slate-600">
+              Preparing photo...
+            </p>
+          ) : null}
+        </div>
+
+        {aiSuggested && !isAnalyzing ? (
+          <p className="rounded-md bg-teal-50 px-4 py-3 text-sm font-semibold text-civic">
+            Fields filled based on your photo — review and edit before
+            submitting.
+          </p>
+        ) : null}
+
         <label className="grid gap-2">
           <span className="text-sm font-bold text-slate-700">Spot Title</span>
           <input
@@ -305,7 +350,7 @@ export function ReportForm() {
         <fieldset className="grid gap-3">
           <legend className="text-sm font-bold text-slate-700">Severity</legend>
           <input type="hidden" name="severity" value={severity} />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-4">
             {SEVERITY_OPTIONS.map((severityValue) => (
               <label
                 key={severityValue}
@@ -320,80 +365,18 @@ export function ReportForm() {
                   className="h-4 w-4 accent-civic"
                   required
                 />
-                {SEVERITY_LABELS[severityValue]}
+                <div className="grid gap-0.5">
+                  <span className="font-bold">
+                    {SEVERITY_LABELS[severityValue]}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {SEVERITY_DESCRIPTIONS[severityValue]}
+                  </span>
+                </div>
               </label>
             ))}
           </div>
         </fieldset>
-
-        <div className="grid gap-5 sm:grid-cols-2">
-          <label className="grid gap-2">
-            <span className="text-sm font-bold text-slate-700">Your Name</span>
-            <input
-              name="reported_by_name"
-              type="text"
-              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
-              required
-            />
-          </label>
-
-          <label className="grid gap-2">
-            <span className="text-sm font-bold text-slate-700">Your Phone</span>
-            <span className="text-xs font-medium text-slate-500">
-              for coordinator to contact you &mdash; not shown publicly
-            </span>
-            <input
-              name="reported_by_phone"
-              type="tel"
-              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none transition focus:border-civic focus:ring-2 focus:ring-civic/20"
-            />
-          </label>
-        </div>
-
-        <div className="grid gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
-          <p className="text-sm font-semibold text-orange-800">
-            Photo will be reviewed by admin before going public.
-          </p>
-          <label className="grid gap-2">
-            <span className="text-sm font-bold text-slate-700">
-              Before Photo
-            </span>
-            <input
-              name="photo"
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="rounded-md border border-slate-300 bg-white px-3 py-3 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-civic file:px-4 file:py-2 file:text-sm file:font-bold file:text-white"
-            />
-          </label>
-
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="Selected cleanup spot"
-              className="h-28 w-28 rounded-md object-cover"
-            />
-          ) : null}
-
-          {isAnalyzing ? (
-            <p className="text-sm font-semibold text-civic">
-              AI is reading your photo...
-            </p>
-          ) : null}
-
-          {isCompressing ? (
-            <p className="text-sm font-semibold text-slate-600">
-              Preparing photo...
-            </p>
-          ) : null}
-        </div>
-
-        {aiSuggested && !isAnalyzing ? (
-          <p className="rounded-md bg-teal-50 px-4 py-3 text-sm font-semibold text-civic">
-            Fields filled based on your photo — review and edit before
-            submitting.
-          </p>
-        ) : null}
 
         {error ? (
           <p className="rounded-md bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">

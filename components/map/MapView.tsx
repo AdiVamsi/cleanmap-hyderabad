@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
 import {
+  SEVERITY_COLORS,
   SEVERITY_LABELS,
   STATUS_COLORS,
   STATUS_LABELS
@@ -45,8 +46,8 @@ function createPopupContent(spot: PublicSpot) {
   chips.className = "mt-3 flex flex-wrap gap-2";
 
   const severity = document.createElement("span");
-  severity.className =
-    "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700";
+  severity.className = "rounded-full px-2.5 py-1 text-xs font-bold text-white";
+  severity.style.backgroundColor = SEVERITY_COLORS[spot.severity];
   severity.textContent = SEVERITY_LABELS[spot.severity];
 
   const status = document.createElement("span");

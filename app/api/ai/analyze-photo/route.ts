@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 type AnalysisResult = {
   waste_type: string | null;
-  severity: "low" | "medium" | "high" | null;
+  severity: "chhota" | "dikkat" | "zabardast" | "khatarnak" | null;
   suggested_title: string | null;
   suggested_description: string | null;
 };
@@ -22,17 +22,20 @@ const PROMPT = `Analyze this photo of a dirty spot in Hyderabad, India reported 
 Respond with ONLY valid JSON — no markdown, no explanation, no code fences:
 {
   "waste_type": "plastic|construction_debris|organic|mixed|other",
-  "severity": "low|medium|high",
+  "severity": "chhota|dikkat|zabardast|khatarnak",
   "suggested_title": "Short specific title, max 60 characters",
   "suggested_description": "1-2 sentences describing what you see, max 180 characters"
 }
 
-Severity rules:
-- high: large pile, blocks footpaths or drains, near water body, health hazard
-- medium: moderate waste, inconvenience but not blocking critical access
-- low: minor scattered litter, small area, minimal public impact
+Severity rules (Hyderabad context):
+- khatarnak: Health hazard, near water body, blocking drain or footpath,
+  large pile affecting many people
+- zabardast: Large pile, serious but not immediately dangerous, needs
+  urgent cleanup
+- dikkat: Moderate waste, inconvenient, noticeable problem for locals
+- chhota: Minor litter, small area, minimal public impact
 
-If the image is unclear or not a waste spot, still return your best guess with severity: "low".`;
+If the image is unclear or not a waste spot, still return your best guess with severity: "chhota".`;
 
 function normalizeAnalysis(value: unknown): AnalysisResult {
   if (!value || typeof value !== "object") {
@@ -41,14 +44,14 @@ function normalizeAnalysis(value: unknown): AnalysisResult {
 
   const result = value as Record<string, unknown>;
   const severity = result.severity;
+  const validSeverities = ["chhota", "dikkat", "zabardast", "khatarnak"];
 
   return {
     waste_type:
       typeof result.waste_type === "string" ? result.waste_type : null,
-    severity:
-      severity === "low" || severity === "medium" || severity === "high"
-        ? severity
-        : null,
+    severity: validSeverities.includes(String(severity))
+      ? (severity as AnalysisResult["severity"])
+      : null,
     suggested_title:
       typeof result.suggested_title === "string"
         ? result.suggested_title
